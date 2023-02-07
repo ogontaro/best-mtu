@@ -1,0 +1,43 @@
+name: Build
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
+        include:
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+
+    runs-on: ${{ matrix.os }}
+    outputs:
+      version: ${{ steps.properties.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: ${{ matrix.target }}
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - name: Build release version
+        run: cargo build --verbose --release --target=${{ matrix.target }}
+      - name: Export properties
+        id: properties
+        shell: bash
+        run: |
+          VERSION="$(cargo run --bin version)"
+          echo "::set-output name=version::$VERSION"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-${{ matrix.target }}-${{steps.properties.outputs.version}}
+          path: target/${{ matrix.target }}/release/bestmtu
