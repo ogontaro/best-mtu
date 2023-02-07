@@ -96,7 +96,7 @@ jobs:
           - target: aarch64-apple-darwin
             os: macos-latest
 
-    needs: [build, draft-release]
+    needs: [ build, draft-release ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v1
@@ -110,12 +110,12 @@ jobs:
           name: build-${{ matrix.target }}-${{ needs.build.outputs.version }}
           path: build/
       - name: zip the artifact
-        run: zip -j build/main.zip build/main
+        run: zip -j build/bestmtu.zip build/bestmtu
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.upload-url.outputs.url }}
-          asset_path: ./build/main.zip
-          asset_name: main-${{ matrix.target }}-${{ needs.build.outputs.version }}.zip
+          asset_path: ./build/bestmtu.zip
+          asset_name: bestmtu-${{ matrix.target }}-${{ needs.build.outputs.version }}.zip
           asset_content_type: application/zip
